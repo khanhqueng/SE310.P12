@@ -1,4 +1,5 @@
-﻿using BLL;
+﻿
+using BLL;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -22,21 +23,19 @@ namespace GUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly FarmManager _farmManager;
-        private readonly FarmContext _context;
+        private readonly FarmManager _context;
 
         public MainWindow()
         {
             InitializeComponent();
-            _context = new FarmContext();  // Khởi tạo DbContext mà không dùng `using`
-            _farmManager = new FarmManager(_context);
+            _context = new FarmManager();  // Khởi tạo DbContext mà không dùng `using`
         }
 
         private void AddLivestock(Livestock livestock)
         {
-            _farmManager.AddLivestock(livestock);  
-            MessageBox.Show($"{livestock.GetType().Name} has been added to the farm."); 
-            Display(); 
+            _context.AddLivestock(livestock);
+            MessageBox.Show($"{livestock.GetType().Name} has been added to the farm.");
+            Display();
         }
 
         private void BtnAddCow_Click(object sender, RoutedEventArgs e)
@@ -57,7 +56,7 @@ namespace GUI
         }
         private void BtnFeedAnimals_Click(object sender, RoutedEventArgs e)
         {
-            _farmManager.FeedAnimals();
+            _context.FeedAnimals();
             MessageBox.Show("All animals have been fed.");
             Display();
         }
@@ -65,16 +64,16 @@ namespace GUI
         private void BtnCollectMilk_Click(object sender, RoutedEventArgs e)
         {
 
-            int milk = _farmManager.CollectMilk();
+            int milk = _context.CollectMilk();
             MessageBox.Show($"Total Milk Collected: {milk} liters");
             Display();
         }
 
         private void BtnReproduce_Click(object sender, RoutedEventArgs e)
         {
-            int quantity= _farmManager.ReproduceAnimals();
+            int quantity = _context.ReproduceAnimals();
             MessageBox.Show("All animals have reproduced.");
-            MessageBox.Show("New offspring: {quantity}", "Reproduction Status", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"New offspring: {quantity}", "Reproduction Status", MessageBoxButton.OK, MessageBoxImage.Information);
 
             Display();
         }
@@ -94,11 +93,21 @@ namespace GUI
                 int cows = context.Cows.Count();
                 int sheeps = context.Sheeps.Count();
                 int goats = context.Goats.Count();
-                int totalMilk = _farmManager.CollectMilk();
+                int totalMilk = _context.CollectMilk();
 
                 StatisticsText.Text = $"Cows: {cows}\nSheeps: {sheeps}\nGoats: {goats}\nTotal Milk Produced: {totalMilk} liters";
             }
         }
 
+        private void BtnGetLiveStock_Click(object sender, RoutedEventArgs e)
+        {
+            List<Cow> liveStocks = _context.GetAllCows();
+            int count = 0;
+            foreach (var cow in liveStocks)
+            {
+                count++;
+                MessageBox.Show($"{count}. {cow.Name} - {cow.GetType().Name}");
+            }
+        }
     }
 }
